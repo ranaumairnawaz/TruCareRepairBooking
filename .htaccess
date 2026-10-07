@@ -1,0 +1,42 @@
+Options -Indexes -MultiViews
+RewriteEngine On
+
+# Forward Authorization header to PHP
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+# API routes
+RewriteRule ^api/?$ api/index.php [L,QSA]
+RewriteRule ^api/(.*)$ api/index.php [L,QSA]
+
+# Static assets
+RewriteRule ^assets/(.*)$ assets/$1 [L]
+RewriteRule ^uploads/(.*)$ uploads/$1 [L]
+
+# Admin area
+RewriteRule ^admin/?$ admin/index.php [L]
+
+<IfModule mod_headers.c>
+  # Uploaded images can be cached longer
+  <FilesMatch "\.(png|jpe?g|gif|webp)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+  # App JS/CSS: always revalidate (URLs also get ?v=filemtime cache-busters from PHP)
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# Block sensitive files
+<FilesMatch "^(config\.php|config\.local\.php|composer\.json|composer\.lock|\.env.*|install\.sql|setup\.php)$">
+  Require all denied
+</FilesMatch>
+
+<IfModule !mod_authz_core.c>
+  <FilesMatch "^(config\.php|config\.local\.php|composer\.json|composer\.lock|\.env.*|install\.sql|setup\.php)$">
+    Order allow,deny
+    Deny from all
+  </FilesMatch>
+</IfModule>

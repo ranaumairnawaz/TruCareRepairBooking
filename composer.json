@@ -1,0 +1,11 @@
+{
+    "name": "repair-shop/backend",
+    "description": "Repair Shop PHP API backend",
+    "require": {
+        "php": ">=7.4",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
